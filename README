@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 Based on:
 ttcn-syntax:
     http://www.vim.org/scripts/script.php?script_id=753
@@ -7,7 +6,14 @@ ttcn-syntax:
 ttcn-indent:
     http://www.vim.org/scripts/script.php?script_id=754
 
-ttcn-ftplugin: http://www.vim.org/scripts/script.php?script_id=793
+ttcn-ftplugin:
+    http://www.vim.org/scripts/script.php?script_id=793
     You should put settings that are specific to TTCN in this file.
+
+ttcn-dict:
+    http://www.vim.org/scripts/script.php?script_id=767
+    Keyword completion for TTCN-3.
+    In insert mode you hit ctrl-x ctrl-k to get suggestions of keywords that could complete the currently typed word.
+    Note: ctrl-x ctrl-k is the Vim built-in method for dictionary completion; check out vimtip #91 and vimtip #102 for cool stuff and adjustments you can make!
 
 For information about TTCN-3, see http://www.etsi.org.
