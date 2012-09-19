@@ -2,10 +2,16 @@
 "
 " Language:     TTCN-3
 " Maintainer:   Stefan Karlsson <stefan.74@comhem.se>
-" Last Change:  10 August 2005
+" Maintainer:   Gustaf Johansson <gustaf dot j at gmail dot com>
+" Last Change:  22 July 2010
 "
-" This file is based on the ETSI standard ES201873-1 v2.2.1. Please let me know
-" of any bugs or other problems you run across.
+" History:
+" Updated the file with the changes in ETSI standard ES 201 873-1
+" V4.1.1. Since Stefan has not updated the file since 2005-08-10 you can
+" contact me with any bugs or other problems you find.
+"
+" Original by Stefan was based on the ETSI standard ES201873-1 v2.2.1. Please
+" let me know of any bugs or other problems you run across.
 
 
 if exists("b:current_syntax")
@@ -29,7 +35,7 @@ syn keyword ttcnType    objid verdicttype timer set record union
 syn keyword ttcnType    enumerated component port of
 syn match   ttcnType    "\<\(char\|bit\|hex\|octet\)string\>"
 syn match   ttcnError   "\<universal\>"
-syn match   ttcnType    "\<universal\s\+char\(string\)\?\>"
+syn match   ttcnType    "\<universal\s\+charstring\>"
 
 " Type definitions
 syn keyword ttcnTypDef  type message procedure mixed 
@@ -42,57 +48,95 @@ syn keyword ttcnModule  module modulepar group
 syn match   ttcnError   "\<import\>"
 syn match   ttcnModule  "\<import\s\+from\>"
 
+" C++ Pre processor directives, used when we have a ttcnpp file
+syn match   ttcnInclude "\^\s\*#\s\*include\>"
+syn match   ttcnDefine  "\^\s\*#\s\*\(define\|undef\)\>"
+syn region  ttcnPreCond start="^\s*#\s*\(if\|ifdef\|ifndef\|elif\)\>" skip="\\$" end="$" contains=ttcnCmnt,ttcnString
+syn match   ttcnPreCond "\^\s\*#\s\*\(else\|endif\)\>"
+
+" Preprocessing macros
+syn keyword ttcnMacro   __MODULE__ __FILE__ __LINE__ __SCOPE__
+
 " Attributes
-syn keyword ttcnAttrib  with display encode extension variant 
+syn keyword ttcnAttrib  with display encode extension variant optional
 
 " Operators
 syn keyword ttcnOper    mod rem not and or xor not4b and4b or4b xor4b
-syn keyword ttcnOper    complement pattern match valueof self mtc read
-syn keyword ttcnOper    activate create running system subset superset  
-syn keyword ttcnOper    getverdict
+syn keyword ttcnOper    complement pattern match valueof subset superset permutation
 syn match   ttcnOper    "[-+*/?]"
 syn match   ttcnOper    "[<>]"
 syn match   ttcnError   "="
-syn match   ttcnoper    "[=!><]="
+syn match   ttcnOper    "[=!><]="
 syn match   ttcnOper    "\(<[<@]\)\|\([>@]>\)"
 syn match   ttcnOper    "&"
 syn match   ttcnError   "&&\+"hs=s+1
 syn match   ttcnOper    "\.\."
 syn match   ttcnError   "\.\.\.\+"hs=s+2
 
+" Visibility
+syn keyword ttcnScope   public friend private
+
 " Statements
-syn keyword ttcnCond    if else
-syn keyword ttcnRepeat  for while do repeat
-syn keyword ttcnStat    log stop alt interleave deactivate connect
-syn keyword ttcnStat    disconnect map unmap start done send call reply
-syn keyword ttcnStat    receive trigger getcall getreply check clear
-syn keyword ttcnStat    timeout setverdict
-syn keyword ttcnStat    action execute return goto
-syn keyword ttcnLabel   label
-syn keyword ttcnExcept  raise catch
-syn match   ttcnstat    "->"
+syn match   ttcnStat    "->"
 syn match   ttcnStat    ":="
-syn keyword ttcnContr   control
+syn keyword ttcnSpecial control extends
 syn match   ttcnError   "\<verdict.\(set\|get\)"
 syn keyword ttcnStat    function testcase signature noblock exception
 syn keyword ttcnStat    altstep template
 syn match   ttcnError   "\<runs\>"
 syn match   ttcnError   "\<on\>"
-syn match   ttcnStat    "\<runs\s\+on\>"
+syn match   ttcnSpecial "\<runs\s\+on\>"
+
+" Basic statements
+syn keyword ttcnCond    if else select
+syn keyword ttcnRepeat  for while do goto
+syn keyword ttcnLabel   case label
+syn keyword ttcnStat    return break continue log stop
+
+" Alt statements & operations
+syn keyword ttcnCond    alt interleave
+syn keyword ttcnStat    repeat activate deactivate
+
+" Config operations
+" stop
+syn keyword ttcnStat    create connect disconnect map unmap start
+syn keyword ttcnOper    mtc system self running kill alive done killed
+
+" Communication operations
+" stop start
+syn keyword ttcnStat    send call reply receive getcall getreply
+syn keyword ttcnExcept  raise catch
+syn keyword ttcnOper    trigger check clear halt
+
+" Timer operations
+" stop start running
+syn keyword ttcnOper    read timeout
+
+" Verdict operations
+syn keyword ttcnStat    setverdict getverdict
+
+" External actions
+syn keyword ttcnOper    action
+
+" Test case operations
+syn keyword ttcnOper    execute
 
 " Predefined functions
 syn keyword ttcnFunc    int2char int2unichar int2bit int2hex int2oct
-syn keyword ttcnFunc    int2str int2float float2int char2int unichar2int
-syn keyword ttcnFunc    bit2int bit2hex bit2oct bit2str hex2int hex2bit
-syn keyword ttcnFunc    hex2oct hex2str oct2int oct2bit oct2str str2int
-syn keyword ttcnFunc    str2oct lengthof sizeof ispresent ischosen regexp
-syn keyword ttcnFunc    substr rnd
+syn keyword ttcnFunc    int2str int2float float2int char2int char2oct
+syn keyword ttcnFunc    unichar2int bit2int bit2hex bit2oct bit2str
+syn keyword ttcnFunc    hex2int hex2bit hex2oct hex2str
+syn keyword ttcnFunc    oct2int oct2bit oct2hex oct2str oct2char
+syn keyword ttcnFunc    str2int str2oct str2float enum2int
+syn keyword ttcnFunc    lengthof sizeof ispresent ischosen
+syn keyword ttcnFunc    isvalue regexp substr replace encvalue
+syn keyword ttcnFunc    decvalue rnd
 
 " Various keywords
 syn keyword ttcnKeyw    in out inout any all sender to value modifies
-syn keyword ttcnKeyw    nowait param length recursive except optional 
-syn keyword ttcnKeyw    ifpresent language override
-syn match   ttcnKeyw    "\<from\>"
+syn keyword ttcnKeyw    nowait param length recursive except
+syn keyword ttcnKeyw    ifpresent language override present
+syn keyword ttcnKeyw    from
 
 " Literals
 syn match   ttcnError   "\_^0\d\+"he=s+1
@@ -105,10 +149,12 @@ syn match   ttcnNumber  "\<infinity\>"
 syn match   ttcnNumber  "-infinity\>"
 syn keyword ttcnBool    true false
 syn keyword ttcnConst   omit null pass fail inconc none error
-syn region  ttcnString  start=/"/ end=/"/ skip=/""/ oneline
+syn region  ttcnString  start=/"/ end=/"/ skip=/\\"/ oneline
 syn match   ttcnString  /'[01]\+'B/
 syn match   ttcnString  /'\x\+'H/
 syn match   ttcnString  /'\(\x\x\)\+'O/
+syn match   ttcnError   /'\x\(\x\x\)\*'O/
+syn match   ttcnError   /''[BHO]/
 
 " Comments 
 if version < 700 
@@ -139,14 +185,19 @@ if version >= 508 || !exists("g:did_ttcn_syn_inits")
   HiLink ttcnConst  Constant
   HiLink ttcnCmnt   Comment
   HiLink ttcnCond   Conditional
-  HiLink ttcnContr  Special
+  HiLink ttcnSpecial    Special
+  HiLink ttcnScope      StorageClass
   HiLink ttcnDecl   Statement
   HiLink ttcnError  Error
   HiLink ttcnExcept Exception
   HiLink ttcnFunc   Function
   HiLink ttcnKeyw   Keyword
   HiLink ttcnLabel  Label
-  HiLink ttcnModule PreProc
+  HiLink ttcnModule     Include
+  HiLink ttcnPreProc    PreProc
+  HiLink ttcnInclude    Include
+  HiLink ttcnDefine     Define
+  HiLink ttcnPreCond    PreCondit
   HiLink ttcnNumber Number
   HiLink ttcnOper   Operator
   HiLink ttcnRepeat Repeat
@@ -156,7 +207,7 @@ if version >= 508 || !exists("g:did_ttcn_syn_inits")
   HiLink ttcnTodo   Todo
   HiLink ttcnType   Type
   HiLink ttcnTypDef TypeDef
-
+  HiLink ttcnMacro      Macro
   delcommand HiLink
 
 endif
