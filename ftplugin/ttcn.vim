@@ -1,12 +1,19 @@
 " Vim filetype plugin file
 " Language:     TTCN-3
 " Maintainer:   Stefan Karlsson <stefan.74@comhem.se>
-" Last Change:  15 April 2004
+" Maintainer:   Gustaf Johansson <gustaf dot j at gmail dot com>
+" Last Change:  15 September 2012
 
 if exists("b:did_ftplugin")
     finish
 endif
 let b:did_ftplugin = 1
+
+if exists("b:undo_ftplugin")
+    let b:undo_ftplugin = b:undo_ftplugin . " | setlocal foldmethod< foldlevel< include< suffixesadd< formatoptions<"
+else
+    let b:undo_ftplugin = "setlocal foldmethod< foldlevel< include< suffixesadd< formatoptions<"
+endif
 
 if exists("g:ttcn_fold")
     setlocal foldmethod=syntax
@@ -14,7 +21,8 @@ if exists("g:ttcn_fold")
 endif
 
 " Path to the dictionary (this path might need adjustment)
-setlocal dict=~\vimfiles\dicts\ttcn.dict
+" Set manually with: setlocal dict=~\path\to\ttcn.dict
+let &dict=expand("<sfile>:p:h") . "\..\dicts\ttcn.dict"
 
 " Enables gf, [I, [i, etc commands for ttcn files
 setlocal include=^\\s*import\\s\\+from
@@ -25,6 +33,5 @@ setlocal formatoptions-=t
 
 " Enable auto breaking of comments and enable formatting of comments with
 " the gq command
-setlocal formatoptions+=croq
+setlocal formatoptions+=croq1n2
 
-setlocal cinoptions=(1s

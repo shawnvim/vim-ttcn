@@ -19,6 +19,7 @@ setlocal indentexpr=Get_ttcn_indent(v:lnum)
 
 setlocal indentkeys=0{,0},0),!^F,o,O,e
 setlocal cinwords=
+setlocal cinoptions=(1s
 
 setlocal comments=sO:*\ -,mO:*\ \ ,exO:*/,s1:/*,mb:*,ex:*/,://
 

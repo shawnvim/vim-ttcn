@@ -24,10 +24,28 @@ else
   syn sync fromstart
 endif
 
-" Automatically define folds. You enable this feature with :let ttcn_fold=1. 
+" Automatically define folds. You enable this feature with :let g:ttcn_fold=1.
 if exists("g:ttcn_fold") && g:ttcn_fold == 1
   syn region ttcnFold start="{" end="}" transparent fold
 endif
+
+" Highlight declared language elements following generic naming conventions,
+" not standardized but noted on http://www.ttcn-3.org/NamingConventions.htm.
+" Enable this feature with :let g:ttcn_hl_naming_convention=1.
+if exists("g:ttcn_hl_naming_convention") && g:ttcn_hl_naming_convention == 1
+  syn match ttcnAltStp "\<as\?_\w\+\>"
+  syn match ttcnConst  "\<c\U\?_\w\+\>"
+  syn match ttcnEnum   "\<e\U\?_\w\+\>"
+  syn match ttcnFunc   "\<f\U\?_\w\+\>"
+  syn match ttcnParam  "\<p\U\?_\w\+\>"
+  syn match ttcnTempl  "\<m\U\?_\w\+\>"
+  syn match ttcnVar    "\<v\U\?_\w\+\>"
+  syn match ttcnTimer  "\<[tT]\U\?_\w\+\>"
+endif
+
+" ETSI ES 201 873-10 V3.4.1
+" Part 10: TTCN-3 Documentation Comment Specification
+syn match ttcnDocComment "@\<\(author\|config\|desc\|exception\|member\|param\|purpose\|remark\|return\|see\|since\|status\|url\|verdict\|version\)\>" contained
 
 " Built-in types
 syn keyword ttcnType    address anytype boolean char default float integer
@@ -38,7 +56,7 @@ syn match   ttcnError   "\<universal\>"
 syn match   ttcnType    "\<universal\s\+charstring\>"
 
 " Type definitions
-syn keyword ttcnTypDef  type message procedure mixed 
+syn keyword ttcnTypDef  type message procedure mixed
 
 " Storage classes
 syn keyword ttcnStore   var const external
@@ -130,7 +148,7 @@ syn keyword ttcnFunc    oct2int oct2bit oct2hex oct2str oct2char
 syn keyword ttcnFunc    str2int str2oct str2float enum2int
 syn keyword ttcnFunc    lengthof sizeof ispresent ischosen
 syn keyword ttcnFunc    isvalue regexp substr replace encvalue
-syn keyword ttcnFunc    decvalue rnd
+syn keyword ttcnFunc    decvalue rnd isbound log2str
 
 " Various keywords
 syn keyword ttcnKeyw    in out inout any all sender to value modifies
@@ -150,19 +168,18 @@ syn match   ttcnNumber  "-infinity\>"
 syn keyword ttcnBool    true false
 syn keyword ttcnConst   omit null pass fail inconc none error
 syn region  ttcnString  start=/"/ end=/"/ skip=/\\"/ oneline
-syn match   ttcnString  /'[01]\+'B/
-syn match   ttcnString  /'\x\+'H/
-syn match   ttcnString  /'\(\x\x\)\+'O/
-syn match   ttcnError   /'\x\(\x\x\)\*'O/
-syn match   ttcnError   /''[BHO]/
+syn match   ttcnString  /'[01]*'B/
+syn match   ttcnString  /'\x*'H/
+syn match   ttcnString  /'\(\x\x\)*'O/
+syn match   ttcnError   /'\x\(\x\x\)*'O/
 
-" Comments 
-if version < 700 
-  syn match   ttcnCmnt    "//.*" contains=ttcnTodo
-  syn region  ttcnCmnt    start="/\*" end="\*/" contains=ttcnTodo
+" Comments
+if version < 700
+  syn match   ttcnCmnt    "//.*" contains=ttcnTodo,ttcnDocComment
+  syn region  ttcnCmnt    start="/\*" end="\*/" contains=ttcnTodo,ttcnDocComment
 else
-  syn match   ttcnCmnt    "//.*" contains=ttcnTodo,@Spell
-  syn region  ttcnCmnt    start="/\*" end="\*/" contains=ttcnTodo,@Spell
+  syn match   ttcnCmnt    "//.*" contains=ttcnTodo,ttcnDocComment,@Spell
+  syn region  ttcnCmnt    start="/\*" end="\*/" contains=ttcnTodo,ttcnDocComment,@Spell
 endif
 
 syn case ignore
@@ -180,34 +197,47 @@ if version >= 508 || !exists("g:did_ttcn_syn_inits")
     command -nargs=+ HiLink hi def link <args>
   endif
 
-  HiLink ttcnAttrib PreProc
-  HiLink ttcnBool   Boolean
-  HiLink ttcnConst  Constant
-  HiLink ttcnCmnt   Comment
-  HiLink ttcnCond   Conditional
+  HiLink ttcnAttrib     PreProc
+  HiLink ttcnBool       Boolean
+  HiLink ttcnConst      Constant
+  HiLink ttcnCmnt       Comment
+  HiLink ttcnCond       Conditional
   HiLink ttcnSpecial    Special
   HiLink ttcnScope      StorageClass
-  HiLink ttcnDecl   Statement
-  HiLink ttcnError  Error
-  HiLink ttcnExcept Exception
-  HiLink ttcnFunc   Function
-  HiLink ttcnKeyw   Keyword
-  HiLink ttcnLabel  Label
+  HiLink ttcnDecl       Statement
+  HiLink ttcnError      Error
+  HiLink ttcnExcept     Exception
+  HiLink ttcnFunc       Function
+  HiLink ttcnKeyw       Keyword
+  HiLink ttcnLabel      Label
   HiLink ttcnModule     Include
   HiLink ttcnPreProc    PreProc
   HiLink ttcnInclude    Include
   HiLink ttcnDefine     Define
   HiLink ttcnPreCond    PreCondit
-  HiLink ttcnNumber Number
-  HiLink ttcnOper   Operator
-  HiLink ttcnRepeat Repeat
-  HiLink ttcnStat   Statement
-  HiLink ttcnStore  StorageClass
-  HiLink ttcnString String
-  HiLink ttcnTodo   Todo
-  HiLink ttcnType   Type
-  HiLink ttcnTypDef TypeDef
+  HiLink ttcnNumber     Number
+  HiLink ttcnOper       Operator
+  HiLink ttcnRepeat     Repeat
+  HiLink ttcnStat       Statement
+  HiLink ttcnStore      StorageClass
+  HiLink ttcnString     String
+  HiLink ttcnTodo       Todo
+  HiLink ttcnType       Type
+  HiLink ttcnTypDef     TypeDef
   HiLink ttcnMacro      Macro
+  HiLink ttcnDocComment SpecialComment
+
+  if exists("g:ttcn_hl_naming_convention") && g:ttcn_hl_naming_convention == 1
+    HiLink ttcnAltStp     Function
+    HiLink ttcnConst      Constant
+    HiLink ttcnEnum       Structure
+    HiLink ttcnFunc       Function
+    HiLink ttcnParam      Identifier
+    HiLink ttcnTempl      Function
+    HiLink ttcnVar        Identifier
+    HiLink ttcnTimer      Special
+  endif
+
   delcommand HiLink
 
 endif
