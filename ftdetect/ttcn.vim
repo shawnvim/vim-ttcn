@@ -1,2 +1,2 @@
 " TTCN filetype
-au BufRead,BufNewFile *.ttcn set filetype=ttcn
+au BufRead,BufNewFile *.{ttcn,ttcn3} set filetype=ttcn
