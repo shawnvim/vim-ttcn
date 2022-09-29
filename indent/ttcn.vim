@@ -17,12 +17,13 @@ let b:did_indent = 1
 
 setlocal indentexpr=Get_ttcn_indent(v:lnum)
 
-setlocal indentkeys=0{,0},0),!^F,o,O,e
+setlocal indentkeys=0{,0},0(,0),!^F,o,O,e
 setlocal cinwords=
-setlocal cinoptions=(1s
 
 setlocal comments=sO:*\ -,mO:*\ \ ,exO:*/,s1:/*,mb:*,ex:*/,://
 
+setlocal cino=(1s,)256,*512
+"setlocal cino=(-20
 
 if exists("*Get_ttcn_indent")
     finish
@@ -84,46 +85,92 @@ let s:sblock = '^\s*\(\(module\|group\|type\|function\|testcase\|control\|alt\(s
             \. '\|template\s\+\i\+\s\+\i\+\s*\(:=\|(\)'
             \. '\|\i\+\s*:=\s*{\)'
 
-function Get_ttcn_indent(lnum)
-    let m1 = Get_previous_code_line(a:lnum)
-    let m2 = Get_previous_code_line(m1)
+    function Get_ttcn_indent(lnum)
+        let m1 = Get_previous_code_line(a:lnum)
+        let m2 = Get_previous_code_line(m1)
 
-    let prevl1 = getline(m1)
-    let prevl2 = getline(m2)
+        let prevl1 = getline(m1)
+        let prevl2 = getline(m2)
 
-    let thisl = getline(a:lnum)
+        let thisl = getline(a:lnum)
 
-    if prevl1 =~# s:prob1
-        let ind = indent(m1) + Parse_cindent('+')
-    elseif prevl1 =~ s:prob2
-        if prevl1 =~ '{[^}]*$'
+        if prevl1 =~# s:prob1 && thisl !~ '^\s*{'
+            echo "ind 1"
+            let ind = indent(m1) + Parse_cindent('+')
+        elseif prevl1 =~ s:prob2
+            echo "ind 2"
+            if prevl1 =~ '{[^}]*$'
+                echo "ind 2-1"
+                let ind = indent(m1) + &sw
+            else
+                if thisl =~ '^\s*}'
+                    echo "ind 2-2"
+                    let ind = indent(m1) - &sw
+                elseif thisl =~ '^\s*);'
+                    echo "ind 2-3"
+                    let ind = cindent(a:lnum)
+                elseif thisl =~ '^\s*)'
+                    echo "ind 2-4"
+                    let ind = indent(m1) - &sw
+                else
+                    echo "ind 2-5"
+                    let ind = indent(m1)
+                endif
+            endif
+        elseif prevl1 =~ ':=\s*{.*}'
+            echo "ind 3"
+            let ind = cindent(a:lnum)
+        elseif prevl1 =~ ':=\s*{'
+            echo "ind 3-1"
             let ind = indent(m1) + &sw
-        else
-            if thisl =~ '^\s*}'
-                let ind = indent(m1) - &sw
+        elseif thisl =~# s:prob2 || thisl =~# '^\s*if('
+
+            let i = m1
+
+            while i > 0 && getline(i) !~# s:sblock
+                let i = Get_previous_code_line(i)
+            endwhile
+
+            if getline(i) =~# '\<alt\(step\)\?\>\|\<interleave\>'
+                let ind = indent(i) + 2*&sw
+                echo "ind 4-1"
+            elseif prevl1 =~ '^\s*)' || prevl1 =~ '^\s*}'
+                let ind = indent(m1)
+                echo "ind 4-2"
+            elseif prevl1 =~ '^\s*(' || prevl1 =~ '^\s*{'
+                let ind = indent(m1) + &sw
+                echo "ind 4-3"
             else
                 let ind = indent(m1)
+                echo "ind 4-3"
             endif
-        endif
-    elseif prevl1 =~ ':=\s*{'
-        let ind = indent(m1) + &sw
-    elseif thisl =~# s:prob2
-        let i = m1
-
-        while i > 0 && getline(i) !~# s:sblock
-            let i = Get_previous_code_line(i)
-        endwhile
-
-        if getline(i) =~# '\<alt\(step\)\?\>\|\<interleave\>'
-            let ind = indent(i) + 2*&sw
+        elseif prevl1 =~ s:prob3 || prevl2 =~ s:prob3 && !Is_code_line(a:lnum)
+            echo "ind 5"
+            let ind = indent(m1)
+"         elseif prevl1 =~ '^\s*);'
+"           echo "ind 6-1"
+"             let ind = indent(m1) - &sw
+        elseif prevl1 =~ '^\s*(\s*$'
+            echo "ind 6-2"
+            let ind = indent(m1) + &sw
+"         elseif prevl1 =~ '^\s*)\s*$' && thisl !~ '^\s*}'
+"            echo "ind 7"
+"             let ind = indent(m1) - &sw
+"         elseif (thisl =~# '^\s*runs on' || thisl =~# '^\s*return') && prevl1 =~ '^\s*)\s*$'
+"            echo "ind 8"
+"             let ind = indent(m1) - &sw
+        elseif thisl =~# '^\s*runs on' || thisl =~# '^\s*return'
+           echo "ind 9"
+            let ind = indent(m1)
+        elseif thisl =~# '^\s*('
+            echo "ind 10"
+            let ind = indent(m1)
         else
-            let ind = indent(i) + &sw
+            echo "ind 11"
+            let ind = cindent(a:lnum)
         endif
-    elseif prevl1 =~ s:prob3 || prevl2 =~ s:prob3 && !Is_code_line(a:lnum)
-        let ind = indent(m1)
-    else
-        let ind = cindent(a:lnum)
-    endif
 
-    return ind
-endfunction
+        return ind
+    endfunction
+
+
